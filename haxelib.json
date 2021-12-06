@@ -1,0 +1,10 @@
+{
+    "name": "hxfabric-glue",
+    "license": "LGPL",
+    "releasenote": "Initial Release",
+    "contributors": [
+        "BulbyVR"
+    ],
+    "version": "0.0.1",
+    "classPath": "src"
+}
