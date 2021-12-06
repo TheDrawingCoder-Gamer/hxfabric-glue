@@ -1,5 +1,7 @@
 package fabric.glue;
 
+using haxe.macro.ComplexTypeTools;
+using haxe.macro.TypeTools;
 import haxe.macro.Printer;
 import sys.FileSystem;
 import haxe.macro.Context;
@@ -48,7 +50,15 @@ class Glue {
                                 }
                                 // NOTE: This will require explicit typing for functions
 								switch (arg.type) {
-									case TPath(p) | TNamed(_, _ => TPath(p)):
+									case TPath(badP) | TNamed(_, _ => TPath(badP)):
+                                        var goodEnum = arg.type.toType().toComplexType();
+                                        var p;
+                                        switch (goodEnum) {
+											case TPath(goodP) | TNamed(_, _ => TPath(goodP)):
+                                                p = goodP;
+                                            default: 
+                                                return null; 
+                                        }
                                         var goodName = javafySpecialTypes(p);
                                         // TODO: Ensure sub isn't specified
                                         if (goodName == p.name && p.name != "String")
