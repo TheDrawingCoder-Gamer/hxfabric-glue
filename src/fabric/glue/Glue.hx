@@ -89,7 +89,7 @@ class Glue {
                                 default: 
 									Context.error("Expected String for at", Context.currentPos());
                             }
-                            var injectStatement = '@Inject(at = @At("${printer.printExpr(theMeta.params[0])}"), method = "${printer.printExpr(theMeta.params[1])}" ${if (theMeta.params.length > 2) ", cancellable =" + theMeta.params[2]})';
+                            var injectStatement = '@Inject(at = @At(${printer.printExpr(theMeta.params[0])}), method = ${printer.printExpr(theMeta.params[1])} ${if (theMeta.params.length > 2) ", cancellable =" + printer.printExpr(theMeta.params[2]) else ""})';
                             // Generate function that sends all its args to our haxe function
                             var theFunction = 'private static void ${f.name}(${[for (i in 0...argNames.length) argTypes[i] + " " + argNames[i]].join(",")}) {\n ${type.get().name}.${f.name}(${argNames.join(",")});}';
                             functions.push(injectStatement + '\n' + theFunction);
@@ -97,7 +97,7 @@ class Glue {
                             
                     }
                 }
-                var mixinMetaString = '@Mixin($name})';
+                var mixinMetaString = '@Mixin($name)';
                 javaFile += '\n';
                 javaFile += imports.map((s) -> 'import $s;').join("\n");
                 javaFile += '\n';
