@@ -23,6 +23,6 @@ Inject is the only kind of metadata supported for functions.
 ```
 Other parameters are outputted as if they were normally printed; Most should work however not everything is tested.
 
-Functions must have explicit typing; These are automatically converted to java types and imports, which are required for it to work. Not everything is tested so some issues may occur. 
+Functions must have explicit typing; These are automatically converted to java types and imports, which are required for it to work. Not everything is tested so some issues may occur. They also must be public and static; when overwriting a static function you must add an `@:static` meta. Otherwise it assumes you are overwriting a non static function.
 
 With the haxe fabric template everything is automatically handled; all that's needed is to install the haxelib. 

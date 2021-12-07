@@ -61,22 +61,24 @@ class Glue {
 					case FFun(fun):
 						var hasMeta = false;
 						var theMeta:Null<haxe.macro.Expr.MetadataEntry> = null;
+						var isStatic = false;
 						for (meta in f.meta) {
 							if (meta.name == ":inject") {
 								if (meta.params.length == 0)
 									Context.error("Inject meta must have some args", meta.pos);
 								hasMeta = true;
 								theMeta = meta;
-								break;
+							}
+							if (meta.name == ":static") {
+								isStatic = true;
 							}
 						}
 						if (!hasMeta)
 							continue;
 						if (!f.access.contains(APublic))
 							Context.error("Injected functions must be public", Context.currentPos());
-						if (!f.access.contains(AStatic)) {
+						if (!f.access.contains(AStatic))
 							Context.error("Injected functions must be static", Context.currentPos());
-						}
 						var argNames:Array<String> = [];
 						var argTypes:Array<String> = [];
 						for (arg in fun.args) {
@@ -145,7 +147,7 @@ class Glue {
 						nameToValue.remove("method");
 						var injectStatement = '@Inject(at = @At(${printer.printExpr(atValue)}), method = ${printer.printExpr(methodValue)} ${if ([for (key in nameToValue.keys()) key].length != 0) "," + [for (key => value in nameToValue) key + " = " + value].join(",") else ""})';
 						// Generate function that sends all its args to our haxe function
-						var theFunction = 'private static void ${f.name}(${[for (i in 0...argNames.length) argTypes[i] + " " + argNames[i]].join(",")}) {\n $ourTypeName.${f.name}(${argNames.join(",")});}';
+						var theFunction = 'private ${if (isStatic) "static" else ""} void ${f.name}(${[for (i in 0...argNames.length) argTypes[i] + " " + argNames[i]].join(",")}) {\n $ourTypeName.${f.name}(${argNames.join(",")});}';
 						functions.push(injectStatement + '\n' + theFunction);
                     default: 
 				}
