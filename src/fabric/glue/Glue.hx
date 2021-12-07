@@ -20,10 +20,12 @@ class Glue {
         if (calledOnRaw == null) return null;
         var calledOn = calledOnRaw.get();
         if (calledOn.meta.has(":mixin")) {
-            trace("has meta");
+
 			var mixinMeta = calledOn.meta.extract(":mixin")[0];
-            Context.info("exists", Context.currentPos());
-			var mixinValues:Map<String, Expr>;
+			var mixinValues:Map<String, Expr> = [];
+            if (mixinMeta.params == null ) {
+                Context.error("Arguments Expected for mixin meta", mixinMeta.pos);
+            }
 			if (mixinMeta.params.length == 1 && !mixinMeta.params[0].expr.match(EBinop(OpAssign, _, _))) {
 				mixinValues.set("value", mixinMeta.params[0]);
 			} else {
@@ -151,7 +153,7 @@ class Glue {
 			var mixinValueClass = mixinValues.get("value");
 			mixinValues.remove("value");
 
-			var mixinMetaString = '@Mixin(value = ${printer.printExpr(mixinValueClass)} ${if (mixinValues.count() != 0) "," + [for (key => value in mixinValues) key + " = " + printer.printExpr(value)].join(",")})';
+			var mixinMetaString = '@Mixin(value = ${printer.printExpr(mixinValueClass)} ${if (mixinValues.count() != 0) "," + [for (key => value in mixinValues) key + " = " + printer.printExpr(value)].join(",") else ""})';
 			javaFile += '\n';
 			javaFile += imports.map((s) -> 'import $s;').join("\n");
 			javaFile += '\n';
