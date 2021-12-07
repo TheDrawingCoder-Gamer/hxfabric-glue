@@ -153,7 +153,8 @@ class Glue {
 			var mixinValueClass = mixinValues.get("value");
 			mixinValues.remove("value");
 
-			var mixinMetaString = '@Mixin(value = ${printer.printExpr(mixinValueClass)} ${if (mixinValues.count() != 0) "," + [for (key => value in mixinValues) key + " = " + printer.printExpr(value)].join(",") else ""})';
+			// class : )
+			var mixinMetaString = '@Mixin(value = ${printer.printExpr(mixinValueClass)}.class ${if (mixinValues.count() != 0) "," + [for (key => value in mixinValues) key + " = " + printer.printExpr(value)].join(",") else ""})';
 			javaFile += '\n';
 			javaFile += imports.map((s) -> 'import $s;').join("\n");
 			javaFile += '\n';
