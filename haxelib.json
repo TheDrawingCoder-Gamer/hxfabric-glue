@@ -6,5 +6,6 @@
         "BulbyVR"
     ],
     "version": "0.1.0",
-    "classPath": "src"
+    "classPath": "src",
+    "url": "https://github.com/TheDrawingCoder-Gamer/hxfabric-glue"
 }

@@ -1,1 +1,1 @@
-# --macro addGlobalMetadata("", "@:build(fabric.glue.Glue.mixin())")
+--macro addGlobalMetadata("", "@:build(fabric.glue.Glue.mixin())")
