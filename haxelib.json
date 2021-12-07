@@ -1,11 +1,11 @@
 {
     "name": "hxfabric-glue",
     "license": "LGPL",
-    "releasenote": "Initial Release",
+    "releasenote": "Edit how metadata is written",
     "contributors": [
         "BulbyVR"
     ],
-    "version": "0.1.0",
+    "version": "0.2.0",
     "classPath": "src",
     "url": "https://github.com/TheDrawingCoder-Gamer/hxfabric-glue"
 }
