@@ -5,20 +5,34 @@ using haxe.macro.TypeTools;
 import haxe.macro.Printer;
 import sys.FileSystem;
 import haxe.macro.Context;
-
+import haxe.macro.Expr;
 class Glue {
     #if macro 
-    public static function mixin(name:String) {
+    public static function mixin(expr:Expr) {
+        // Forbidden early typing
+        var goodType = Context.typeof(expr).toComplexType();
+        var name:String;
+        switch (goodType) {
+            case TPath(p) | TNamed(_, _ => TPath(p)):
+                // Class<>
+                name = p.name.substr(6, -1);
+            default: 
+                Context.error("Expected module path", Context.currentPos());
+                return null;
+
+        }
+		
         var calledOn = Context.getLocalType();
         switch (calledOn) {
             case TInst(type, _): 
-                
-				Context.info("hello", Context.currentPos());
                 var fields = haxe.macro.Context.getBuildFields();
-                var imports = [type.get().module, "org.spongepowered.asm.mixin.Mixin", "org.spongepowered.asm.mixin.injection.At", "org.spongepowered.asm.mixin.injection.Inject", ];
+                
+                var imports = ["org.spongepowered.asm.mixin.Mixin", "org.spongepowered.asm.mixin.injection.At", "org.spongepowered.asm.mixin.injection.Inject", ];
                 var modulePathList = type.get().module.split(".");
+				var ourTypeName = modulePathList.join(".");
                 modulePathList.insert(-1, "glue");
-                var javaFile = 'package ${modulePathList.join(".")};';
+                
+                var javaFile = 'package ${modulePathList.slice(0, -1).join(".")};';
                 var functions:Array<String> = [];
                 var printer = new Printer();
                 for (f in fields) {
@@ -101,21 +115,22 @@ class Glue {
                             }
                             var injectStatement = '@Inject(at = @At(${printer.printExpr(theMeta.params[0])}), method = ${printer.printExpr(theMeta.params[1])} ${if (theMeta.params.length > 2) ", cancellable =" + printer.printExpr(theMeta.params[2]) else ""})';
                             // Generate function that sends all its args to our haxe function
-                            var theFunction = 'private static void ${f.name}(${[for (i in 0...argNames.length) argTypes[i] + " " + argNames[i]].join(",")}) {\n ${type.get().name}.${f.name}(${argNames.join(",")});}';
+                            var theFunction = 'private static void ${f.name}(${[for (i in 0...argNames.length) argTypes[i] + " " + argNames[i]].join(",")}) {\n $ourTypeName.${f.name}(${argNames.join(",")});}';
                             functions.push(injectStatement + '\n' + theFunction);
                         case FVar(_, _) | FProp(_,_,_,_):
                             
                     }
                 }
-                var mixinMetaString = '@Mixin($name)';
+                var mixinMetaString = '@Mixin($name.class)';
                 javaFile += '\n';
                 javaFile += imports.map((s) -> 'import $s;').join("\n");
                 javaFile += '\n';
                 javaFile += mixinMetaString;
                 javaFile += 'public abstract class ${type.get().name} { \n ${functions.join("\n")}}';
-                if (!FileSystem.exists('./glue/${modulePathList.slice(0, -1).join("/")}')) 
-					FileSystem.createDirectory('./glue/${modulePathList.slice(0, -1).join("/")}');
-                sys.io.File.saveContent('./glue/${modulePathList.join("/")}.java', javaFile);
+                
+                if (!FileSystem.exists('./glue/main/java/${modulePathList.slice(0, -1).join("/")}')) 
+					FileSystem.createDirectory('./glue/main/java/${modulePathList.slice(0, -1).join("/")}');
+                sys.io.File.saveContent('./glue/main/java/${modulePathList.join("/")}.java', javaFile);
                 // Dont actually change anything, this is only used to generate java files
                 return null;
             case _: 
